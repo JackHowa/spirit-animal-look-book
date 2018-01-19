@@ -3,7 +3,7 @@ import { auth, database } from './firebase';
 import CurrentUser from './CurrentUser';
 import SignIn from './SignIn';
 import ProfileCard from './ProfileCard';
-import pick from 'lodash/pick' ;
+import pick from 'lodash/pick' ; // takes an object and gets all of the keys that's a smaller subset 
 import map from 'lodash/map';
 import './Application.css';
 
@@ -20,6 +20,7 @@ class App extends Component {
 
   componentDidMount() {
     auth.onAuthStateChanged(user => {
+      // if there is a user that exists here 
       if (user) {
         this.setState({ user });
 
@@ -27,17 +28,19 @@ class App extends Component {
         this.usersRef = database.ref('/users');
 
         // set the user based on their uid 
-        this.userRef = this.userRefs.child(user.uid);
-
+        this.userRef = this.usersRef.child(user.uid);
         // check if the user in db 
+        // want to do the users just once 
+        // use the promise api for this 
         this.userRef.once('value').then(snapshot => {
           if (snapshot.val()) return;
           // pick all gathers a subset of an object from loadash 
-          const user = pick(snapshot.val(), ['displayName', 'photoURL', 'email']);
+          const userData = pick(user, ['displayName', 'photoURL', 'email']); // we only want these key-values for that user
           this.userRef.set(userData);
         });
 
-        this.userRef.on('value', snapshot => {
+        this.usersRef.on('value', snapshot => {
+          // setup a listener for all of the users 
           this.setState({ users: snapshot.val() });
         });
       }
@@ -52,7 +55,21 @@ class App extends Component {
         <header className="App--header">
           <h1>Social Animals</h1>
         </header>
-        <SignIn />
+        {
+          user ? <div>
+            <section className="ProfileCards">
+              {
+                map(users, (userElement, uid) => {
+                  return <ProfileCard key={uid} user={userElement} uid={uid} />
+                })
+              }
+            </section>
+            <CurrentUser user={user} /> 
+            </div>
+            : 
+            <SignIn />
+        }
+        
       </div>
     );
   }
