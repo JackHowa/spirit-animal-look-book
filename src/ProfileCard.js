@@ -6,6 +6,13 @@ import './ProfileCard.css';
 class ProfileCard extends Component {
   constructor(props) {
     super(props);
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(event) {
+    const files = event.target.files[0]; // get the very first element of the array
+    console.log(files);
   }
 
   render() {
@@ -17,6 +24,12 @@ class ProfileCard extends Component {
           src={ photoURL }
         />
         <p>{ displayName }</p>
+        <FileInput
+          accept=".png,.gif,.jpg"
+          placeholder="Select an image"
+          onChange={this.handleSubmit}
+        />
+      
       </article>
     );
   }
