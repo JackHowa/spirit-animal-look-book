@@ -7,12 +7,30 @@ class ProfileCard extends Component {
   constructor(props) {
     super(props);
 
+    // setup the route for firebase to store 
+    this.storageRef = storage.ref('/user-images').child(props.uid);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.userRef = database.ref('/users').child(props.uid);
   }
 
   handleSubmit(event) {
-    const files = event.target.files[0]; // get the very first element of the array
-    console.log(files);
+    const file = event.target.files[0]; // get the very first element of the array
+    
+    // name of the file is the file directoyr
+    const uploadTask = this.storageRef.child(file.name).put(file, { contentType: file.type }); // put is for adding to storage 
+    
+    uploadTask.on('state_changed', snapshot => {
+      // use firebase upload task 
+    })
+    
+    uploadTask.then((snapshot) => {
+      // set the snapshot for the photo seen on the page 
+      this.userRef.child('photoURL').set(snapshot.downloadURL);
+    });
+    
+                                      
+
+    
   }
 
   render() {
